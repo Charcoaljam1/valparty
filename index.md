@@ -53,8 +53,7 @@ layout: none
 <body>
 
   <div class="card">
-    <h1>💘 Find Your Table</h1>
-    <h4> Welcome 💘 to WCI-Dundee Valentine's Day Party Night</h4>
+    <h1>Welcome To Our Valentine's Day Party 💘</h1>
     <p>Enter your first name or full name</p>
     <input id="name" placeholder="e.g. Tim or Tim Talabi" />
     <button onclick="findSeat()">Find My Table</button>
