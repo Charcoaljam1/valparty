@@ -45,8 +45,21 @@ layout: none
     }
     .result {
       margin-top: 1rem;
-      font-size: 18px;
+      font-size: 20px; /* Slightly larger for prominence */
       font-weight: bold;
+      padding: 15px; /* Add some padding */
+      border-radius: 8px; /* Rounded corners */
+      transition: all 0.3s ease-in-out; /* Smooth transitions */
+    }
+    .result.verified {
+      background-color: #e6ffe6; /* Light green background */
+      color: #006600; /* Dark green text */
+      border: 2px solid #006600; /* Green border */
+    }
+    .result.not-verified {
+      background-color: #ffe6e6; /* Light red background */
+      color: #cc0000; /* Dark red text */
+      border: 2px solid #cc0000; /* Red border */
     }
   </style>
 </head>
@@ -54,14 +67,18 @@ layout: none
 
   <div class="card">
     <h1>Happy Valentine's Day 💘</h1>
-    <p>Enter your first name or full name to find your seat</p>
+    <p>Enter guest's name for payment verification:</p>
     <input id="name" placeholder="e.g. Tim or Tim Talabi" />
-    <button onclick="findSeat()">Find My Table</button>
+    <button onclick="findSeat()">Verify Payment</button>
+    <button onclick="resetCheckIns()" style="background: #ccc; color: #333; margin-top: 10px;">Reset Check-ins</button>
     <div class="result" id="result"></div>
   </div>
 
   <!-- PASTE YOUR <script> HERE -->
   <script>
+    // Initialize checkedIn status from local storage
+    let checkedInGuests = JSON.parse(localStorage.getItem('checkedInGuests')) || {};
+
     const guests = [
       // Table 1
       { keys: ["tim", "tim talabi", "pastor tim talabi"], display: "Pastor Tim Talabi", table: 1, couple: null },
@@ -139,26 +156,76 @@ layout: none
     function findSeat() {
       const input = normalize(document.getElementById("name").value);
       const resultEl = document.getElementById("result");
+      
+      // Clear previous classes and content
+      resultEl.classList.remove('verified', 'not-verified', 'checked-in');
+      resultEl.innerHTML = ''; // Clear content
   
       const guest = guests.find(g =>
         g.keys.some(k => normalize(k) === input)
       );
   
       if (!guest) {
-        resultEl.innerHTML = "❌ Name not found. Please check spelling or see the host.";
+        resultEl.innerHTML = "❌ <strong>Name Not Found. Payment Not Verified.</strong> Please check spelling or see the event organizer.";
+        resultEl.classList.add('not-verified');
         return;
+      }
+
+      const guestId = guest.display; // Use display name as a unique ID for checking in
+
+      if (checkedInGuests[guestId]) {
+          resultEl.innerHTML = `⚠️ <strong>${guest.display} is already Checked In.</strong>`;
+          resultEl.classList.add('not-verified'); // Use not-verified style for already checked in
+          return;
       }
   
       if (guest.couple) {
         const partner = guests.find(g => g.couple === guest.couple && g.display !== guest.display);
         if (partner) {
-          resultEl.innerHTML = `💑 <strong>${guest.display}</strong> & <strong>${partner.display}</strong><br>💺 You are seated at <strong>Table ${guest.table}</strong>`;
+          resultEl.innerHTML = `✅ <strong>Payment Verified! Checked In.</strong><br>💑 <strong>${guest.display}</strong> & <strong>${partner.display}</strong><br>💺 You are seated at <strong>Table ${guest.table}</strong>`;
+          resultEl.classList.add('verified');
+          
+          // Mark both guests as checked in
+          checkedInGuests[guestId] = true;
+          checkedInGuests[partner.display] = true;
+          localStorage.setItem('checkedInGuests', JSON.stringify(checkedInGuests));
+
           return;
         }
       }
   
-      resultEl.innerHTML = `🎉 Welcome <strong>${guest.display}</strong><br>💺 Your table is <strong>Table ${guest.table}</strong>`;
+      resultEl.innerHTML = `✅ <strong>Payment Verified! Checked In.</strong><br>🎉 Welcome <strong>${guest.display}</strong><br>💺 Your table is <strong>Table ${guest.table}</strong>`;
+      resultEl.classList.add('verified');
+
+      // Mark single guest as checked in
+      checkedInGuests[guestId] = true;
+      localStorage.setItem('checkedInGuests', JSON.stringify(checkedInGuests));
     }
+
+    function resetCheckIns() {
+        if (confirm("Are you sure you want to reset all checked-in statuses? This cannot be undone.")) {
+            localStorage.removeItem('checkedInGuests');
+            checkedInGuests = {}; // Reset in-memory state
+            const resultEl = document.getElementById("result");
+            resultEl.innerHTML = '🔄 All check-in statuses have been reset.';
+            resultEl.classList.remove('verified', 'not-verified');
+        }
+    }
+
+    // Function to get query parameters from the URL
+    function getQueryParam(param) {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get(param);
+    }
+
+    // On page load, check for 'name' in URL parameters
+    window.onload = function() {
+        const guestNameFromURL = getQueryParam('name');
+        if (guestNameFromURL) {
+            document.getElementById("name").value = guestNameFromURL;
+            findSeat();
+        }
+    };
   </script>
 
 
