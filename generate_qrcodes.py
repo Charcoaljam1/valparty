@@ -72,7 +72,7 @@ for guest in guests_data:
     # Generate QR code
     # Using display_name for filename, replacing problematic characters
     filename_safe_name = display_name.replace(" ", "_").replace("/", "-").replace(":", "").replace("&", "and").replace("'", "")
-    qr_filename = os.path.join(QR_CODES_DIR, f"{filename_safe_name}_table_{guest['table']}.png")
+    qr_filename = os.path.join(QR_CODES_DIR, f"{filename_safe_name}.png")
     
     img = qrcode.make(qr_url)
     img.save(qr_filename)

@@ -70,7 +70,7 @@ layout: none
     <p>Enter guest's name for payment verification:</p>
     <input id="name" placeholder="e.g. Tim or Tim Talabi" />
     <button onclick="findSeat()">Verify Payment</button>
-    <button onclick="resetCheckIns()" style="background: #ccc; color: #333; margin-top: 10px;">Reset Check-ins</button>
+
     <div class="result" id="result"></div>
   </div>
 
@@ -202,15 +202,7 @@ layout: none
       localStorage.setItem('checkedInGuests', JSON.stringify(checkedInGuests));
     }
 
-    function resetCheckIns() {
-        if (confirm("Are you sure you want to reset all checked-in statuses? This cannot be undone.")) {
-            localStorage.removeItem('checkedInGuests');
-            checkedInGuests = {}; // Reset in-memory state
-            const resultEl = document.getElementById("result");
-            resultEl.innerHTML = '🔄 All check-in statuses have been reset.';
-            resultEl.classList.remove('verified', 'not-verified');
-        }
-    }
+
 
     // Function to get query parameters from the URL
     function getQueryParam(param) {
